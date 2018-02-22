@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-import faas_converter.faasconverter
+import faas_converter.faasconverter as fc
 import argparse
 
 if __name__ == '__main__':
@@ -29,4 +29,4 @@ if __name__ == '__main__':
                               by default False',
                         default=False)
     args = parser.parse_args()
-    faasconverter(args.file, args.providers, args.function, args.jw)
+    fc.converter(args.file, args.providers, args.function, args.jw)

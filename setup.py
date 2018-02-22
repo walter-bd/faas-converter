@@ -8,9 +8,9 @@ from setuptools import setup
 import os
 
 setup(
-	name="faasconverter",
+	name="faas-converter",
 	description="Function as a service converter",
-	version="0.0.1",
+	version="0.0.2",
 	url="https://github.com/walter-bd/faas-converter",
 	author="Walter Benitez",
 	author_email="walterbenitez7@gmail.com",
