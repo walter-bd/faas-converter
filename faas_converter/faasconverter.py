@@ -215,7 +215,7 @@ def function_portable(mod, providers, filename, entry):
             printcontents(s)
 
 
-def faasconverter(module, providers, function="", jw=False):
+def converter(module, providers, function="", jw=False):
     basemodule = module.replace(".py", "")
     printout("track module: {}".format(basemodule))
     (fileobj, filename, desc) = imp.find_module(basemodule, ["."])
