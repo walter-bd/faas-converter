@@ -23,6 +23,7 @@ setup(
 		"Programming Language :: Python :: 3",
 		"Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware"
 	],
+	download_url = 'https://github.com/walter-bd/faas-converter/0.1.tar.gz'
 	keywords="cloud faas serverless functions",
 	packages=["faas_converter"],
 	scripts=["faasconverter"]
