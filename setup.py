@@ -24,6 +24,6 @@ setup(
 		"Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware"
 	],
 	keywords="cloud faas serverless functions",
-	packages=["faas-converter"],
+	packages=["faas_converter"],
 	scripts=["faasconverter"]
 )

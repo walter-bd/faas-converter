@@ -4,7 +4,7 @@ A lib to convert python functions to the right sintaxis for deployment in AWS, A
 
 ## Getting Started
 
-Using from terminal 
+Example of use from terminal 
 ```
 ./faasconverter --file test.py --function foo --providers aws,  azure --just-wrap False
 ```

@@ -2,7 +2,6 @@
 
 import imp
 import os
-import argparse
 from inspect import signature, isfunction
 
 
@@ -225,33 +224,3 @@ def faasconverter(module, providers, function="", jw=False):
         multiple(mod, providers, filename)
     else:
         just_one(mod, providers, filename, str(function), jw)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(add_help=True)
-    parser.add_argument('--file', type=str, action='store', dest='file',
-                        help='Python file to convert')
-    parser.add_argument('--providers', type=str, action='store',
-                        dest='providers', nargs='+',
-                        help='Providers chossen for the conversion.\
-                              Is a list and by default the providers are \
-                              [\"aws\", \"ibm\", \"ovh\", \"fission\",\
-                               \"azure\"]',
-                        default=str(["aws", "ibm", "ovh", "fission", "azure"])
-                        )
-    parser.add_argument('--function', type=str, action='store',
-                        dest='function',
-                        help='Specific function to convert \
-                              ,if not chossen all main functions \
-                               will be converted \
-                               and exported to specific files with \
-                               _portable.py termination',
-                        default="")
-    parser.add_argument('--just-wrap', type=bool, action='store', dest='jw',
-                        help='Wrap the convertion module to the end of file\
-                              ,it creates just one file. \
-                              Type Boolean (True or False) \
-                              by default False',
-                        default=False)
-    args = parser.parse_args()
-    faasconverter(args.file, args.providers, args.function, args.jw)
