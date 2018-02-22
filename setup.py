@@ -18,7 +18,6 @@ setup(
 	classifiers=[
 		"Development Status :: 2 - Pre-Alpha",
 		"Environment :: Console",
-		"Environment :: No Input/Output (Daemon)",
 		"Intended Audience :: Science/Research",
 		"License :: OSI Approved :: Apache Software License",
 		"Programming Language :: Python :: 3",
