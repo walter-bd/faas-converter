@@ -12,7 +12,7 @@ Options
 
 **file** File to convert to the selected provider sintax
 
-**function** Selected functions to convert to the providers sintax
+**function** Selected function to convert to the providers sintax
 
 **just-wrap** To only add the sintax wrapper on the end of the selected file
 
