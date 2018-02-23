@@ -11,8 +11,11 @@ Example of use from terminal
 Options 
 
 **file** File to convert to the selected provider sintax
+
 **function** Selected functions to convert to the providers sintax
+
 **just-wrap** To only add the sintax wrapper on the end of the selected file
+
 **providers** List of selected providers to which to convert the functions
 
 ### Installing
