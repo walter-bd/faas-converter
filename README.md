@@ -8,15 +8,21 @@ Example of use from terminal
 ```
 ./faasconverter --file test.py --function foo --providers aws,  azure --just-wrap False
 ```
+Options 
+
+**file** File to convert to the selected provider sintax
+**function** Selected functions to convert to the providers sintax
+**just-wrap** To only add the sintax wrapper on the end of the selected file
+**providers** List of selected providers to which to convert the functions
 
 ### Installing
 
 ```
-pip install faasconverter 
+pip install faas-converter 
 ```
 or 
 ```
-pip3 install faasconverter 
+pip3 install faas-converter 
 ```
 
 ## Authors
