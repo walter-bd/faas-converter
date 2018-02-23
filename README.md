@@ -6,7 +6,7 @@ A lib to convert python functions to the right sintaxis for deployment in AWS, A
 
 Example of use from terminal 
 ```
-./faasconverter --file test.py --function foo --providers aws,  azure --just-wrap False
+./faasconverter --file test.py --function foo --providers aws,  azure --just-wrap False --all-together True
 ```
 Options 
 
@@ -18,12 +18,10 @@ Options
 
 **providers** List of selected providers to which to convert the functions
 
+**all-together** Put all the wrappers together and add it to the the end of each file
+
 ### Installing
 
-```
-pip install faas-converter 
-```
-or 
 ```
 pip3 install faas-converter 
 ```
