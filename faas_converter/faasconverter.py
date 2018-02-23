@@ -117,6 +117,7 @@ def addwrappers(entry, parameters, providers):
             s += "\tresponse.write(str(d))\n"
             s += "\tresponse.close()\n"
             s += "\n"
+        if (len(providers) == 1):
             s += "main()"
     return (s)
 
@@ -291,9 +292,11 @@ def converter(module, providers, function, jw, insecure,
         try:
             for i in ast.parse(open(module).read()).body:
                 if (not isinstance(i, ast.FunctionDef) and
-                        not isinstance(i, ast.Import)):
+                        not isinstance(i, ast.Import) and
+                        not isinstance(i, ast.ImportFrom)):
                     printout("Error, insecure file. Executable code found on \
 runtime import")
+                    printout(str(i))
                     os._exit(1)
         except IOError as e:
             printout("File not found")
