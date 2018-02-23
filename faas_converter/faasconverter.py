@@ -4,6 +4,7 @@ import imp
 import os
 from inspect import signature, isfunction
 
+default_providers = ["aws", "ibm", "ovh", "fission", "azure"]
 
 def printout(*s):
     red = "\033[1;31m"
@@ -138,11 +139,17 @@ def just_one(mod, providers, filename, entry, jw=False):
     if (not jw):
         function_portable(mod, providers, filename, entry)
     else:
-        entrytype = mod.__dict__[entry]
+        try:
+            entrytype = mod.__dict__[entry]
+        except KeyError as e:
+            printout("Function not found, KeyError")
+            printout(str(e))
+            os._exit(1)
         if isfunction(entrytype):
             for provider in providers:
                 sig = signature(entrytype)
-                convmodule = "{}_{}_portable.py".format(filename, provider)
+                convmodule = "{}_{}_portable.py".format(
+                    filename.replace(".py", ""), provider)
                 if (os.path.exists(convmodule)):
                     printout("File exists")
                     continue
@@ -159,7 +166,12 @@ def just_one(mod, providers, filename, entry, jw=False):
 
 
 def function_portable(mod, providers, filename, entry):
-    entrytype = mod.__dict__[entry]
+    try:
+        entrytype = mod.__dict__[entry]
+    except KeyError as e:
+        printout("Function not found, KeyError")
+        printout(str(e))
+        os._exit(1)
     if isfunction(entrytype):
         sig = signature(entrytype)
         printout("convert function", entry, sig)
@@ -170,10 +182,14 @@ def function_portable(mod, providers, filename, entry):
                 printout("File exists")
                 continue
             wrappers = addwrappers(entry, sig.parameters, provider)
-            if wrappers == "":
+            if wrappers == "" and not (provider in default_providers):
                 printout("{} is not an available provider for the converter\
                          ".format(provider))
                 continue
+            elif wrappers == "":
+                printout("Function {} has the parameters entry and context, \
+assuming that it has already the sintax for the \
+provider {}".format(entry, provider))
             f = open(convmodule, 'w')
             num_lines = sum(1 for line in fileobj)
             final_line = fileobj.tell()

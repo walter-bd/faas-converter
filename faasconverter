@@ -12,7 +12,7 @@ if __name__ == '__main__':
                               Is a list and by default the providers are \
                               [\"aws\", \"ibm\", \"ovh\", \"fission\",\
                                \"azure\"]',
-                        default=str(["aws", "ibm", "ovh", "fission", "azure"])
+                        default=["aws", "ibm", "ovh", "fission", "azure"]
                         )
     parser.add_argument('--function', type=str, action='store',
                         dest='function',
@@ -29,4 +29,9 @@ if __name__ == '__main__':
                               by default False',
                         default=False)
     args = parser.parse_args()
-    fc.converter(args.file, args.providers, args.function, args.jw)
+    if args.file is not None:
+        fc.converter(args.file, args.providers, args.function, args.jw)
+    else:
+        fc.printout("Error - File not selected, please select a file to \
+convert")
+        parser.print_help()
