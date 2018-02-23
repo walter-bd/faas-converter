@@ -1,10 +1,12 @@
 #! /usr/bin/env python3
 
 import imp
+import copy as cp
+import ast
+import importlib
 import os
 from inspect import signature, isfunction
 
-default_providers = ["aws", "ibm", "ovh", "fission", "azure"]
 
 def printout(*s):
     red = "\033[1;31m"
@@ -130,14 +132,14 @@ def check_line(string, f):
     return pos
 
 
-def multiple(mod, providers, filename):
+def multiple(mod, providers, filename, all_together):
     for entry in mod.__dict__:
-        function_portable(mod, providers, filename, entry)
+        function_portable(mod, providers, filename, entry, all_together)
 
 
-def just_one(mod, providers, filename, entry, jw=False):
+def just_one(mod, providers, filename, entry, jw, all_together):
     if (not jw):
-        function_portable(mod, providers, filename, entry)
+        function_portable(mod, providers, filename, entry, all_together)
     else:
         try:
             entrytype = mod.__dict__[entry]
@@ -146,26 +148,50 @@ def just_one(mod, providers, filename, entry, jw=False):
             printout(str(e))
             os._exit(1)
         if isfunction(entrytype):
-            for provider in providers:
-                sig = signature(entrytype)
-                convmodule = "{}_{}_portable.py".format(
-                    filename.replace(".py", ""), provider)
+            sig = signature(entrytype)
+            fileobj = open(filename, "r")
+            basename = os.path.basename(filename)
+            printout("convert function", entry, sig)
+            if (not all_together):
+                for provider in providers:
+                    convmodule = "{}_{}_portable.py".format(
+                                    basename.replace(".py", ""), provider)
+                    if (os.path.exists(convmodule)):
+                        printout("File {} exists".format(convmodule))
+                        continue
+                    wrappers = addwrappers(entry, sig.parameters, provider)
+                    if wrappers == "":
+                        printout("Not an available provider or the file \
+already has the sintax for the provider {}".format(provider))
+                        continue
+                    f = open(convmodule, 'w')
+                    s = fileobj.read() + 2*"\n" + wrappers
+                    print(s, file=f)
+                    printout("converted to module: {}".format(convmodule))
+                    printcontents(s)
+                    f.close()
+            else:
+                convmodule = "{}_portable.py".format(
+                                basename.replace(".py", ""))
                 if (os.path.exists(convmodule)):
-                    printout("File exists")
-                    continue
-                f = open(convmodule, 'w')
-                printout("convert function", entry, sig)
-                fileobj = open(filename, "r")
-                wrappers = addwrappers(entry, sig.parameters, provider)
-                s = fileobj.read() + 2*"\n" + wrappers
-                print(s, file=f)
-                f.close()
-                fileobj.close()
-                printout("converted to module: {}".format(convmodule))
-                printcontents(s)
+                    printout("File {} exists".format(convmodule))
+                else:
+                    printout("convert function", entry, sig)
+                    wrappers = addwrappers(entry, sig.parameters, providers)
+                    if wrappers == "":
+                        printout("Not an available provider or the file \
+already has the sintax for the provider {}".format(providers))
+                    else:
+                        f = open(convmodule, 'w')
+                        s = fileobj.read() + 2*"\n" + wrappers
+                        print(s, file=f)
+                        printout("converted to module: {}".format(convmodule))
+                        printcontents(s)
+                        f.close()
+            fileobj.close()
 
 
-def function_portable(mod, providers, filename, entry):
+def function_portable(mod, providers, filename, entry, all_together):
     try:
         entrytype = mod.__dict__[entry]
     except KeyError as e:
@@ -175,68 +201,107 @@ def function_portable(mod, providers, filename, entry):
     if isfunction(entrytype):
         sig = signature(entrytype)
         printout("convert function", entry, sig)
-        for provider in providers:
-            fileobj = open(filename, "r")
-            convmodule = "{}_{}_portable.py".format(entry, provider)
-            if (os.path.exists(convmodule)):
-                printout("File exists")
-                continue
-            wrappers = addwrappers(entry, sig.parameters, provider)
-            if wrappers == "" and not (provider in default_providers):
-                printout("{} is not an available provider for the converter\
-                         ".format(provider))
-                continue
-            elif wrappers == "":
-                printout("Function {} has the parameters entry and context, \
-assuming that it has already the sintax for the \
-provider {}".format(entry, provider))
-            f = open(convmodule, 'w')
-            num_lines = sum(1 for line in fileobj)
-            final_line = fileobj.tell()
-            s = ""
-            fileobj.seek(0)
-            parameter_def = check_line("def", fileobj)
-            fileobj.seek(parameter_def)
-            start_entry_line = check_line(("def " + entry), fileobj)
+        fileobj = open(filename, "r")
+        num_lines = sum(1 for line in fileobj)
+        final_line = fileobj.tell()
+        s = ""
+        fileobj.seek(0)
+        parameter_def = check_line("def", fileobj)
+        fileobj.seek(parameter_def)
+        start_entry_line = check_line(("def " + entry), fileobj)
+        line = fileobj.readline()
+        while line:
+            if (len(line) == len(line.lstrip()) or
+                    fileobj.tell() == final_line):
+                final_entry_line = fileobj.tell()
+                break
             line = fileobj.readline()
-            while line:
-                if (len(line) == len(line.lstrip()) or
-                        fileobj.tell() == final_line):
-                    final_entry_line = fileobj.tell()
-                    break
+        fileobj.seek(0)
+        line = fileobj.readline()
+        while line:
+            if fileobj.tell() == (parameter_def):
+                break
+            else:
+                s += line
                 line = fileobj.readline()
-            fileobj.seek(0)
-            line = fileobj.readline()
-            while line:
-                if fileobj.tell() == (parameter_def):
-                    break
-                else:
-                    s += line
-                    line = fileobj.readline()
-            fileobj.seek(start_entry_line)
-            line = fileobj.readline()
-            while line:
+        if (not all_together):
+            for provider in providers:
+                k = cp.deepcopy(s)
+                fileobj.seek(start_entry_line)
+                line = fileobj.readline()
+                convmodule = "{}_{}_portable.py".format(
+                                entry, provider)
+                if (os.path.exists(convmodule)):
+                    printout("File {} exists".format(convmodule))
+                    continue
+                wrappers = addwrappers(entry, sig.parameters, provider)
+                if wrappers == "":
+                    printout("Not an available provider or the file \
+already has the sintax for the provider {}".format(provider))
+                    continue
+                f = open(convmodule, 'w')
+                while line:
                     if (fileobj.tell() == final_entry_line):
                         if final_line == fileobj.tell():
-                            s += line
-                        s += 2*"\n" + wrappers
+                            k += line
+                        k += 2*"\n" + wrappers
                         break
                     else:
-                        s += line
+                        k += line
                         line = fileobj.readline()
-            print(s, file=f)
-            f.close()
-            fileobj.close()
-            printout("converted to module: {}".format(convmodule))
-            printcontents(s)
+                print(k, file=f)
+                printout("converted to module: {}".format(convmodule))
+                printcontents(k)
+                f.close()
+        else:
+            fileobj.seek(start_entry_line)
+            line = fileobj.readline()
+            convmodule = "{}_portable.py".format(
+                            entry)
+            if (os.path.exists(convmodule)):
+                printout("File {} exists".format(convmodule))
+            else:
+                wrappers = addwrappers(entry, sig.parameters, providers)
+                if wrappers == "":
+                    printout("Not an available provider or the file \
+already has the sintax for the provider {}".format(providers))
+                else:
+                    f = open(convmodule, 'w')
+                    while line:
+                        if (fileobj.tell() == final_entry_line):
+                            if final_line == fileobj.tell():
+                                s += line
+                            s += 2*"\n" + wrappers
+                            break
+                        else:
+                            s += line
+                            line = fileobj.readline()
+                    print(s, file=f)
+                    f.close()
+                    printout("converted to module: {}".format(convmodule))
+                    printcontents(s)
+        fileobj.close()
 
 
-def converter(module, providers, function="", jw=False):
+def converter(module, providers, function, jw, insecure,
+              all_together):
     basemodule = module.replace(".py", "")
     printout("track module: {}".format(basemodule))
+    if (not insecure):
+        try:
+            for i in ast.parse(open(module).read()).body:
+                if (not isinstance(i, ast.FunctionDef) and
+                        not isinstance(i, ast.Import)):
+                    printout("Error, insecure file. Executable code found on \
+runtime import")
+                    os._exit(1)
+        except IOError as e:
+            printout("File not found")
+            printout(str(e))
+            os._exit(1)
     (fileobj, filename, desc) = imp.find_module(basemodule, ["."])
     mod = imp.load_module(basemodule, fileobj, filename, desc)
     if function == "":
-        multiple(mod, providers, filename)
+        multiple(mod, providers, filename, all_together)
     else:
-        just_one(mod, providers, filename, str(function), jw)
+        just_one(mod, providers, filename, str(function), jw, all_together)

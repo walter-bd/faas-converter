@@ -2,6 +2,12 @@
 import faas_converter.faasconverter as fc
 import argparse
 
+
+def str2bool(v):
+    return str(v) in ("yes", "true", "True")
+
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=True)
     parser.add_argument('--file', type=str, action='store', dest='file',
@@ -22,15 +28,29 @@ if __name__ == '__main__':
                                and exported to specific files with \
                                _portable.py termination',
                         default="")
-    parser.add_argument('--just-wrap', type=bool, action='store', dest='jw',
+    parser.add_argument('--just-wrap', type=str, action='store', dest='jw',
                         help='Wrap the convertion module to the end of file\
                               ,it creates just one file. \
                               Type Boolean (True or False) \
                               by default False',
-                        default=False)
+                        default="False")
+    parser.add_argument('--insecure', type=str, action='store', dest='insec',
+                        help='Allows to run the programm without check for \
+                              executable code on the import runtime. \
+                              Type Boolean (True or False) \
+                              by default False',
+                        default="False")
+    parser.add_argument('--all-together', type=str, action='store', dest='at',
+                        help='Put all the wrappers on one file.\
+                              Type Boolean (True or False) \
+                              by default True',
+                        default="True")
     args = parser.parse_args()
     if args.file is not None:
-        fc.converter(args.file, args.providers, args.function, args.jw)
+        fc.converter(args.file,
+                     args.providers, args.function, jw=str2bool(args.jw),
+                     insecure=str2bool(args.insec),
+                     all_together=str2bool(args.at))
     else:
         fc.printout("Error - File not selected, please select a file to \
 convert")
