@@ -1,6 +1,6 @@
 # FaaS Python Converter
 
-A lib to convert python functions to the right sintaxis for deployment in AWS, Azure, IBM(OpenWhisk) OVH or Fission
+A lib to convert python functions to the right sintaxis for deployment in AWS, Azure, IBM(OpenWhisk), OVH or Fission
 
 ## Getting Started
 
@@ -16,7 +16,7 @@ Options
 
 **just-wrap** To only add the sintax wrapper on the end of the selected file
 
-**providers** List of selected providers to which to convert the functions, available = ["aws","ibm","azure","ovh","fission"]
+**providers** List of selected providers to which to convert the functions, available = aws, ibm, azure, ovh, fission
 
 **all-together** Put all the wrappers together and add it to the the end of each file
 
