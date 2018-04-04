@@ -29,7 +29,7 @@ pip3 install faas-converter
 ## Authors
 
 * **Josef Spillner** - [ZHAW/SPLAB](https://github.com/serviceprototypinglab)
-* **Walter Benitez** - [GitHUB](https://github.com/walter-bd)
+* **Walter Benitez** - [PTI/CTIC](https://github.com/walter-bd)
 
 ## License
 
